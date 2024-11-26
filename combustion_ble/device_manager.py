@@ -417,20 +417,27 @@ class DeviceManager(BleManagerDelegate):
                 return
 
             # Update node if it is in device list
-            if (node := self.devices.get(identifier)) and isinstance(node, MeatNetNode):
-                node.update_with_advertising(advertising, is_connectable, rssi)
+            meatnet_node = None
+            new_node = False
+            if (meatnet_node := self.devices.get(identifier)) and isinstance(meatnet_node, MeatNetNode):
+                meatnet_node.update_with_advertising(advertising, is_connectable, rssi)
+                
             else:
                 # Create node and add to device list
                 meatnet_node = MeatNetNode(advertising, self, is_connectable, rssi, identifier)
                 self._add_device(meatnet_node)
+                new_node = True
 
-                # Update the probe associated with this advertising data
-                probe = self.update_probe_with_advertising(
-                    advertising, is_connectable=None, rssi=None, identifier=None
-                )
-                if probe:
-                    # Add probe to meatnet node
-                    meatnet_node.update_networked_probe(probe)
+
+            # Update the probe associated with this advertising data
+            probe = self.update_probe_with_advertising(
+                advertising, is_connectable=None, rssi=None, identifier=None
+            )
+            if probe:
+                # Add probe to meatnet node
+                meatnet_node.update_networked_probe(probe)
+
+                if new_node:
                     # Notify connection manager
                     self.connection_manager.received_probe_advertising_from_node(
                         probe, meatnet_node
