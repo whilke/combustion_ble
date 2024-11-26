@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from datetime import datetime
 
 from combustion_ble.ble_data.advertising_data import AdvertisingData
 from combustion_ble.devices.device import Device
@@ -34,6 +35,7 @@ class MeatNetNode(Device):
     ):
         self._rssi.update(rssi)
         self.is_connectable = is_connectable
+        self.last_update_time = datetime.now()        
 
     def update_networked_probe(self, probe: "Probe"):
         if probe is not None:
